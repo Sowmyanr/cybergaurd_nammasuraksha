@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Armour - Detection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    /* Basic Reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Orbitron', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0a0a0a;
+      color: #00f9ff;
+      scroll-behavior: smooth;
+      line-height: 1.6;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background: linear-gradient(90deg, #0d0d0d 0%, #1f0036 100%);
+      box-shadow: 0 2px 25px rgba(0, 255, 255, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .logo {
+      font-size: 30px;
+      font-weight: bold;
+      color: #00f9ff;
+      text-shadow: 0 0 10px #00f9ff;
+    }
+    nav a {
+      margin: 0 15px;
+      text-decoration: none;
+      color: #00f9ff;
+      font-weight: 600;
+      transition: color 0.3s, text-shadow 0.3s;
+    }
+    nav a:hover {
+      color: #ff00d4;
+      text-shadow: 0 0 10px #ff00d4;
+    }
+    .container {
+      background: #1a0033;
+      color: #e0e0e0;
+      padding: 32px 24px;
+      border-radius: 16px;
+      box-shadow: 0 0 30px #00f9ff33, 0 0 60px #ff00d433;
+      margin: 40px auto 32px auto;
+      max-width: 700px;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #00f9ff;
+      text-shadow: 0 0 10px #00f9ff;
+    }
+    input, button, select {
+      padding: 12px;
+      margin: 8px 0;
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 8px;
+      border: 1px solid #00f9ff;
+      background: #0a0a0a;
+      color: #00f9ff;
+      font-size: 16px;
+    }
+    button {
+      background: linear-gradient(90deg, #00f9ff 0%, #ff00d4 100%);
+      color: #0a0a0a;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 0 10px #00f9ff, 0 0 20px #ff00d4;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #ff00d4 0%, #00f9ff 100%);
+      color: #fff;
+      box-shadow: 0 0 20px #ff00d4, 0 0 40px #00f9ff;
+    }
+    #result, #recentScans, #threatFeed {
+      margin-top: 20px;
+    }
+    .scan-item, .threat-item {
+      padding: 16px;
+      border-bottom: 1px solid #222;
+      margin-bottom: 10px;
+      background: #110022;
+      border-radius: 8px;
+      color: #fff;
+    }
+    .threat-item:last-child {
+      border-bottom: none;
+    }
+    .threat-item span {
+      font-weight: bold;
+      color: #d9534f;
+    }
+    .threat-item p {
+      margin: 5px 0;
+    }
+    footer {
+      background: #0a0a0a;
+      color: #00f9ff;
+      text-align: center;
+      padding: 30px 0;
+      margin-top: 40px;
+      font-size: 14px;
+      box-shadow: 0 -2px 20px rgba(255, 0, 212, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">🛡 Armour</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="#detection">Detection</a>
+      <a href="#threat-feed">Threat Feed</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Detection Dashboard</h1>
+    <div class="container">
+      <input type="text" id="linkInput" placeholder="Enter a URL to scan">
+      <button onclick="scanLink()">Scan Link</button>
+      <div id="result"></div>
+      <button onclick="loadRecentScans()">Load Recent Scans</button>
+      <div id="recentScans"></div>
+    </div>
+    <div class="container">
+      <h2>Threat Intelligence Feed</h2>
+      <select id="threatFilter" onchange="filterThreats()">
+        <option value="">All Threat Types</option>
+        <option value="botnet_cc">Botnet Command Center</option>
+        <option value="payload_delivery">Malware Delivery</option>
+        <option value="payload">Malware Payload</option>
+      </select>
+      <button onclick="loadThreatFeed()">Refresh Threat Feed</button>
+      <div id="threatFeed"></div>
+    </div>
+  </main>
+  <footer>
+    <p>© 2025 Armour. All rights reserved.</p>
+  </footer>
+  <script>
+    let allThreats = [];
+    async function scanLink() {
+      const link = document.getElementById('linkInput').value;
+      if (!link) {
+        alert('Please enter a URL');
+        return;
+      }
+      try {
+        const response = await fetch('http://localhost:3000/api/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ link })
+        });
+        const result = await response.json();
+        document.getElementById('result').innerHTML = `
+          <p><strong>Link:</strong> ${link}</p>
+          <p><strong>Status:</strong> ${result.isPhishing ? 'Phishing' : 'Safe'}</p>
+          <p><strong>Message:</strong> ${result.message}</p>
+          ${result.threatFeedMatch ? '<p><strong>Threat Feed Alert:</strong> This link matches a known threat in the Threat Intelligence Feed!</p>' : ''}
+          <p><strong>Source:</strong> ${result.source}</p>
+        `;
+      } catch (error) {
+        document.getElementById('result').innerHTML = `<p>Error: ${error.message}</p>`;
+      }
+    }
+    async function loadRecentScans() {
+      try {
+        const response = await fetch('http://localhost:3000/api/scans');
+        const scans = await response.json();
+        const scanList = scans.map(scan => `
+          <div class="scan-item">
+            <p><strong>Status:</strong> ${scan.isPhishing ? 'Phishing' : 'Safe'}</p>
+            <p><strong>Message:</strong> ${scan.message}</p>
+            <p><strong>Source:</strong> ${scan.source}</p>
+            <p><strong>Timestamp:</strong> ${new Date(scan.timestamp).toLocaleString()}</p>
+          </div>
+        `).join('');
+        document.getElementById('recentScans').innerHTML = scanList;
+      } catch (error) {
+        document.getElementById('recentScans').innerHTML = `<p>Error: ${error.message}</p>`;
+      }
+    }
+    async function loadThreatFeed() {
+      document.getElementById('threatFeed').innerHTML = '<p>Loading...</p>';
+      try {
+        const response = await fetch('http://localhost:3000/api/threat-feed');
+        allThreats = await response.json();
+        displayThreats(allThreats);
+      } catch (error) {
+        document.getElementById('threatFeed').innerHTML = `<p>Error: ${error.message}</p>`;
+      }
+    }
+    function displayThreats(threats) {
+      const feed = threats.map(threat => {
+        const firstSeen = threat.firstSeen && threat.firstSeen !== 'Not available' ? new Date(threat.firstSeen) : null;
+        const lastSeen = threat.lastSeen && threat.lastSeen !== 'Not tracked' ? new Date(threat.lastSeen) : null;
+        return (
+          `<div class="threat-item">
+            <p><strong>Dangerous Link or Address:</strong> ${threat.ioc || 'Not available'}</p>
+            <p><strong>Type of Threat:</strong> <span>${threat.threatType === 'botnet_cc' ? 'Botnet Command Center' : threat.threatType === 'payload_delivery' ? 'Malware Delivery' : threat.threatType === 'payload' ? 'Malware Payload' : 'Unknown'}</span></p>
+            <p><strong>What This Threat Does:</strong> ${threat.threatTypeDesc || "This is a dangerous activity, but we don't have more details."}</p>
+            <p><strong>Item Type:</strong> ${threat.iocType === 'ip:port' ? 'IP Address and Port' : threat.iocType === 'url' ? 'Website Link' : 'Not specified'}</p>
+            <p><strong>What That Type Means:</strong> ${threat.iocTypeDesc || "We don't have more details about this type."}</p>
+            <p><strong>Name of the Harmful Software:</strong> ${threat.malwarePrintable || 'Not identified'}</p>
+            <p><strong>Other Names for This Software:</strong> ${threat.malwareAlias || 'None known'}</p>
+            <p><strong>Learn More About This Software:</strong> ${threat.malwareMalpedia !== 'Not available' ? `<a href="${threat.malwareMalpedia}" target="_blank">Click here</a>` : 'No link available'}</p>
+            <p><strong>How Sure We Are This Is Dangerous:</strong> ${threat.confidenceLevel}% (Higher numbers mean we're more certain)</p>
+            <p><strong>First Spotted On:</strong> ${firstSeen && !isNaN(firstSeen) ? firstSeen.toLocaleString() : 'Date not available'}</p>
+            <p><strong>Last Spotted On:</strong> ${lastSeen && !isNaN(lastSeen) ? lastSeen.toLocaleString() : 'Not tracked yet'}</p>
+            <p><strong>More Information Source:</strong> ${threat.reference !== 'Not available' ? `<a href="${threat.reference}" target="_blank">Click here</a>` : 'No source available'}</p>
+            <p><strong>Who Reported This Threat:</strong> ${threat.reporter || 'Anonymous'}</p>
+            <p><strong>Related Keywords:</strong> ${threat.tags || 'None'}</p>
+          </div>`
+        );
+      }).join('');
+      document.getElementById('threatFeed').innerHTML = feed;
+    }
+    function filterThreats() {
+      const filter = document.getElementById('threatFilter').value;
+      const filteredThreats = filter
+        ? allThreats.filter(threat => threat.threatType === filter)
+        : allThreats;
+      displayThreats(filteredThreats);
+    }
+    // Load recent scans on page load, but not the threat feed
+    window.onload = () => {
+      loadRecentScans();
+    };
+  </script>
+</body>
+</html>

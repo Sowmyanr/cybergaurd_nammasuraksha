@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login / Register</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+    }
+    .container {
+      background: #23272f;
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 32px rgba(0,0,0,0.6);
+      overflow: hidden;
+      width: 100%;
+      max-width: 420px;
+      border: 1px solid #333;
+    }
+    .error {
+      color: #f87171;
+      font-size: 0.875rem;
+      display: none;
+    }
+    input {
+      background: #18181b;
+      color: #e5e7eb;
+      border: 1px solid #333;
+    }
+    input:focus {
+      border-color: #6366f1;
+      background: #23272f;
+    }
+    button {
+      transition: background 0.2s, transform 0.2s;
+    }
+    button:active {
+      transform: scale(0.97);
+    }
+    a.text-blue-500 {
+      color: #60a5fa;
+    }
+    a.text-blue-500:hover {
+      color: #3b82f6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container p-8">
+    <!-- Login Form -->
+    <div id="login-form">
+      <h2 class="text-2xl font-bold text-center mb-6">Login</h2>
+      <div class="flex justify-center gap-4 mb-6">
+        <a href="http://localhost:3000/auth/google" class="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+          <i class="fab fa-google"></i> Google
+        </a>
+        <a href="http://localhost:3000/auth/github" class="flex items-center gap-2 bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+      </div>
+      <div class="text-center text-gray-500 mb-4">or</div>
+      <form id="login" onsubmit="handleLogin(event)">
+        <div class="mb-4">
+          <input type="email" id="login-email" placeholder="Email" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+          <span id="login-email-error" class="error">Invalid email</span>
+        </div>
+        <div class="mb-4">
+          <input type="password" id="login-password" placeholder="Password" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+          <span id="login-password-error" class="error">Invalid email or password</span>
+        </div>
+        <button type="submit" class="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600">Login</button>
+      </form>
+      <p class="text-center mt-4">Don't have an account? <a href="#" onclick="toggleForm('register')" class="text-blue-500 hover:underline">Register</a></p>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register-form" class="hidden">
+      <h2 class="text-2xl font-bold text-center mb-6">Register</h2>
+      <div class="flex justify-center gap-4 mb-6">
+        <a href="http://localhost:3000/auth/google" class="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+          <i class="fab fa-google"></i> Google
+        </a>
+        <a href="http://localhost:3000/auth/github" class="flex items-center gap-2 bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+      </div>
+      <div class="text-center text-gray-500 mb-4">or</div>
+      <form id="register" onsubmit="handleRegister(event)">
+        <div class="mb-4">
+          <input type="text" id="register-username" placeholder="Username" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+          <span id="register-username-error" class="error">Username must be at least 3 characters</span>
+        </div>
+        <div class="mb-4">
+          <input type="email" id="register-email" placeholder="Email" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+          <span id="register-email-error" class="error">Invalid email</span>
+        </div>
+        <div class="mb-4">
+          <input type="password" id="register-password" placeholder="Password" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+          <span id="register-password-error" class="error">Password must be at least 6 characters</span>
+        </div>
+        <button type="submit" class="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600">Register</button>
+      </form>
+      <p class="text-center mt-4">Already have an account? <a href="#" onclick="toggleForm('login')" class="text-blue-500 hover:underline">Login</a></p>
+    </div>
+  </div>
+
+  <script>
+    // Animate container on load
+    document.addEventListener('DOMContentLoaded', function() {
+      anime({
+        targets: '.container',
+        opacity: [0, 1],
+        translateY: [40, 0],
+        duration: 1200,
+        easing: 'easeOutExpo'
+      });
+      anime({
+        targets: '#login-form, #register-form',
+        opacity: [0, 1],
+        translateY: [30, 0],
+        delay: anime.stagger(200, {start: 600}),
+        duration: 1000,
+        easing: 'easeOutExpo'
+      });
+    });
+
+    // Animate form switch
+    function toggleForm(form) {
+      const login = document.getElementById('login-form');
+      const register = document.getElementById('register-form');
+      if (form === 'login') {
+        anime({targets: register, opacity: 0, duration: 300, easing: 'easeInExpo', complete: () => {
+          register.classList.add('hidden');
+          login.classList.remove('hidden');
+          anime({targets: login, opacity: [0,1], duration: 400, easing: 'easeOutExpo'});
+        }});
+      } else {
+        anime({targets: login, opacity: 0, duration: 300, easing: 'easeInExpo', complete: () => {
+          login.classList.add('hidden');
+          register.classList.remove('hidden');
+          anime({targets: register, opacity: [0,1], duration: 400, easing: 'easeOutExpo'});
+        }});
+      }
+    }
+
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    async function handleRegister(event) {
+      event.preventDefault();
+      const username = document.getElementById('register-username').value;
+      const email = document.getElementById('register-email').value;
+      const password = document.getElementById('register-password').value;
+      let valid = true;
+
+      document.getElementById('register-username-error').style.display = 'none';
+      document.getElementById('register-email-error').style.display = 'none';
+      document.getElementById('register-password-error').style.display = 'none';
+
+      if (username.length < 3) {
+        document.getElementById('register-username-error').style.display = 'block';
+        valid = false;
+      }
+      if (!validateEmail(email)) {
+        document.getElementById('register-email-error').style.display = 'block';
+        valid = false;
+      }
+      if (password.length < 6) {
+        document.getElementById('register-password-error').style.display = 'block';
+        valid = false;
+      }
+
+      if (valid) {
+        try {
+          const response = await axios.post('http://localhost:3000/api/register', { username, email, password });
+          alert('Registration successful! Please login.');
+          toggleForm('login');
+        } catch (error) {
+          const message = error.response?.data?.message || 'Registration failed';
+          document.getElementById('register-email-error').textContent = message;
+          document.getElementById('register-email-error').style.display = 'block';
+        }
+      }
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      let valid = true;
+
+      document.getElementById('login-email-error').style.display = 'none';
+      document.getElementById('login-password-error').style.display = 'none';
+
+      if (!validateEmail(email)) {
+        document.getElementById('login-email-error').style.display = 'block';
+        valid = false;
+      }
+
+      if (valid) {
+        try {
+          const response = await axios.post('http://localhost:3000/api/login', { email, password });
+          localStorage.setItem('token', response.data.token);
+          window.location.href = 'http://localhost:3000/dashboard.html';
+        } catch (error) {
+          document.getElementById('login-password-error').style.display = 'block';
+        }
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+<title>Signup to Signin</title>
+<style>
+
+.input-icon {
+    position: relative;
+    width: 100%;
+}
+.input-icon i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #00f9ff;
+}
+.input-icon input {
+    padding-left: 35px !important;
+}
+.social-icons{
+    margin: 20px 0;
+}
+
+.social-icons a{
+    border: 1px solid #ccc;
+    border-radius: 20%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 3px;
+    width: 40px;
+    height: 40px;
+}
+
+.toggle-container{
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    transition: all 0.6s ease-in-out;
+    border-radius: 150px 0 0 100px;
+    z-index: 1000;
+}
+
+.container.active .toggle-container{
+    transform: translateX(-100%);
+    border-radius: 0 150px 100px 0;
+}
+ 
+.toggle{
+    background-color: #477d9a;
+    height: 100%;
+    background: linear-gradient(to right, #150026, #0d0d0d);
+    color: #00f9ff; text-shadow: 0 0 8px #00f9ff;
+    position: relative;
+    left: -100%;
+    height: 100%;
+    width: 200%;
+    transform: translateX(0);
+    transition: all 0.6s ease-in-out;
+}
+
+.container.active .toggle{
+    transform: translateX(50%);
+}
+
+.toggle-panel{
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 30px;
+    text-align: center;
+    top: 0;
+    transform: translateX(0);
+    transition: all 0.6s ease-in-out;
+}
+
+.toggle-left{
+    transform: translateX(-200%);
+}
+
+.container.active .toggle-left{
+    transform: translateX(0);
+}
+body {
+    background-image: url('login.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  
+.toggle-right{
+    right: 0;
+    transform: translateX(0);
+}
+
+.container.active .toggle-right{
+    transform: translateX(200%);
+}
+
+.container button:hover {
+    background: linear-gradient(90deg, #0077ff, #00bfff);
+    box-shadow: 0 0 15px #00bfff, 0 0 25px #0077ff;
+}
+
+</style></head>
+<body class="auth-page">
+<div class="container active" id="container"> <!-- Default active state for Sign-Up -->
+<!-- Sign-Up Form -->
+<div class="form-container sign-up">
+<form id="signup-form">
+<h1>Create Account</h1>
+<div class="social-icons">
+<a class="icon" href="#"><i class="fa-brands fa-google-plus-g"></i></a>
+<a class="icon" href="#"><i class="fa-brands fa-facebook-f"></i></a>
+<a class="icon" href="#"><i class="fa-brands fa-github"></i></a>
+<a class="icon" href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+</div>
+<span>or use your email for registration</span>
+<div class="input-icon"><i class="fas fa-user"></i><input placeholder="Name" required="" type="text"/></div>
+<div class="input-icon"><i class="fas fa-envelope"></i><input placeholder="Email" required="" type="email"/></div>
+<div class="input-icon"><i class="fas fa-lock"></i><input placeholder="Password" required="" type="password"/></div>
+<button type="submit">Sign Up</button>
+</form>
+</div>
+<!-- Sign-In Form -->
+<div class="form-container sign-in">
+<form>
+<h1>Sign In</h1>
+<div class="social-icons">
+<a class="icon" href="#"><i class="fa-brands fa-google-plus-g"></i></a>
+<a class="icon" href="#"><i class="fa-brands fa-facebook-f"></i></a>
+<a class="icon" href="#"><i class="fa-brands fa-github"></i></a>
+<a class="icon" href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+</div>
+<span>or use your email password</span>
+<div class="input-icon"><i class="fas fa-envelope"></i><input placeholder="Email" required="" type="email"/></div>
+<div class="input-icon"><i class="fas fa-lock"></i><input placeholder="Password" required="" type="password"/></div>
+<a href="#">Forget Your Password?</a>
+<button type="submit">Sign In</button>
+</form>
+</div>
+<!-- Toggle Panels -->
+<div class="toggle-container">
+<div class="toggle">
+<div class="toggle-panel toggle-left">
+<h1>Welcome Back!</h1>
+<p>Enter your personal details to use all of our site features</p>
+<button class="hidden" id="login">Sign In</button>
+</div>
+<div class="toggle-panel toggle-right">
+<h1>Hello, Friend!</h1>
+<p>Register with your personal details to use all of our site features</p>
+<button class="hidden" id="register">Sign Up</button>
+</div>
+</div>
+</div>
+</div>
+<!-- JavaScript -->
+<script>
+        const container = document.getElementById('container');
+        const registerBtn = document.getElementById('register');
+        const loginBtn = document.getElementById('login');
+        const signupForm = document.getElementById('signup-form');
+
+        // Toggle to Sign-Up form
+        registerBtn.addEventListener('click', () => {
+            container.classList.add("active");
+        });
+
+        // Toggle to Sign-In form
+        loginBtn.addEventListener('click', () => {
+            container.classList.remove("active");
+        });
+
+        // After successful Sign-Up, navigate to Sign-In
+        signupForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Prevent form from refreshing the page
+            alert("Account created successfully!"); // Optional feedback message
+            container.classList.remove("active"); // Switch to Sign-In form
+        });
+    </script>
+</body>
+</html>

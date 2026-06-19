@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Cyber Guardian Plugin",
+  "version": "1.0",
+  "description": "Detects phishing links on web pages",
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_title": "Rescan links"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://localhost:*/*", "<all_urls>"],
+      "js": ["anime.min.js", "plugin.js"],
+      "css": []
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
